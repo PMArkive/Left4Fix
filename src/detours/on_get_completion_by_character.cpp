@@ -35,6 +35,12 @@
 namespace Detours
 {
 	int __thiscall OnGetCompletionByCharacter::OnGetCompletion(int survivorType, int team) {
-		return g_iHighestVersusSurvivorCompletion[survivorType];
+		// Read from the game's internal survivors_completion_score[team][survivorType] array
+		// instead of the extension's single-team g_iHighestVersusSurvivorCompletion array.
+		// This fixes the bug where both teams would show the same score because the team
+		// parameter was being ignored.
+		uint32_t (*piVersusSurvivorCompletion)[4] = reinterpret_cast<uint32_t(*)[4]>(
+			(unsigned char *)(this) + g_versusSurvivorCompletionOffset);
+		return piVersusSurvivorCompletion[team][survivorType];
 	}
 }
